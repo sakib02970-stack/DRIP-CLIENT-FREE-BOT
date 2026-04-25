@@ -1,6 +1,5 @@
-
 """
-Telegram Referral Bot - FIXED: Better notification message for verified referrals
+Telegram Referral Bot - FIXED: Proper channel re-verification after leave
 Author: Assistant
 """
 
@@ -233,27 +232,42 @@ def give_key_to_user(user_id):
     return key, "Success"
 
 # ============ VERIFICATION ============
+# FIXED: Completely rewritten check_channel_status for accuracy
 
 async def check_channel_status(user_id, channel_id, context):
+    """
+    Check if user is a member of the channel.
+    Returns: (is_member: bool, status: str)
+    """
     try:
         member = await context.bot.get_chat_member(channel_id, user_id)
-
-        if member.status in ["member", "administrator", "creator"]:
-            return True, "joined"
-
-        return False, "not_joined"
-
+        status = member.status
+        
+        # These statuses mean the user is IN the channel
+        if status in ['member', 'administrator', 'creator', 'restricted']:
+            return True, status
+        # These statuses mean the user is NOT in the channel
+        elif status in ['left', 'kicked']:
+            return False, status
+        else:
+            # Unknown status - treat as not joined to be safe
+            return False, f"unknown:{status}"
+            
     except Exception as e:
-        print(f"Check failed for {channel_id}: {e}")
-        return False, "not_joined"
+        # If API call fails (bot not admin, channel invalid, etc.)
+        # We MUST treat as NOT JOINED - force user to re-verify
+        print(f"[CHECK FAIL] Channel {channel_id}, User {user_id}: {e}")
+        return False, "api_error"
 
 async def get_unjoined_channels(user_id, context):
+    """Get list of channels the user has NOT joined"""
     channels = get_channels()
     unjoined = []
     for ch in channels:
-        is_ok, status = await check_channel_status(user_id, ch["id"], context)
-        if not is_ok:
+        is_member, status = await check_channel_status(user_id, ch["id"], context)
+        if not is_member:
             unjoined.append(ch)
+            print(f"[UNJOINED] User {user_id} not in {ch['id']} (status: {status})")
     return unjoined
 
 # ============ KEYBOARD BUILDERS ============
@@ -316,7 +330,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception as e:
             print(f"Error processing referral: {e}")
 
-    # Check channel joins
+    # FIXED: Always re-check channel joins - never trust cached "verified" status
     unjoined = await get_unjoined_channels(user_id, context)
 
     if not unjoined:
@@ -335,6 +349,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main_menu(update, context)
     else:
         channels = get_channels()
+        # FIXED: Reset verified status since they left channels
+        update_user_data(user_id, "verified", False)
+        
         text = "🔰 *WELCOME TO THE BOT!*\n\n"
         text += "📢 Please join all channels to use this bot:\n\n"
         text += f"⏳ Remaining: *{len(unjoined)}* channel(s)\n\n"
@@ -378,6 +395,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data
 
     if data == "verify_join":
+        # FIXED: Re-check channels every time - don't rely on old state
         unjoined = await get_unjoined_channels(user_id, context)
         if not unjoined:
             # All channels joined - process pending referral if any
@@ -395,6 +413,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await show_main_menu(update, context)
         else:
             channels = get_channels()
+            # FIXED: Reset verified status
+            update_user_data(user_id, "verified", False)
+            
             text = "❌ *You have not joined all channels yet!*\n\n"
             text += f"⏳ Remaining: *{len(unjoined)}* channel(s)\n\n"
             text += "📢 Please click JOIN buttons and send request, then click JOINED/REQUESTED!"
