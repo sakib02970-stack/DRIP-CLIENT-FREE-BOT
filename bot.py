@@ -21,7 +21,7 @@ from telegram.ext import (
 from telegram.constants import ParseMode
 
 # ============ CONFIGURATION ============
-BOT_TOKEN = "8703538025:AAF2cKnseYpQGGJN4k4JE2a1B30jKHK8yYg"
+BOT_TOKEN = "8422003531:AAEQA-Gemi_GFb4-CgmDPMDW8OzvAVARJZU"
 OWNER_IDS = [7682896710, 7765423734]
 NOTIFY_GROUP_ID = -1003715248836
 YOUTUBE_LINK = "https://youtube.com/yourlink"
