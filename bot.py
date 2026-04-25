@@ -237,19 +237,15 @@ def give_key_to_user(user_id):
 async def check_channel_status(user_id, channel_id, context):
     try:
         member = await context.bot.get_chat_member(channel_id, user_id)
-        if member.status in ['member', 'administrator', 'creator']:
+
+        if member.status in ["member", "administrator", "creator"]:
             return True, "joined"
-    except Exception:
-        pass
 
-    try:
-        member = await context.bot.get_chat_member(channel_id, user_id)
-        if member.status != 'left':
-            return True, "pending"
-    except Exception:
-        pass
+        return False, "not_joined"
 
-    return False, "not_found"
+    except Exception as e:
+        print(f"Check failed for {channel_id}: {e}")
+        return False, "not_joined"
 
 async def get_unjoined_channels(user_id, context):
     channels = get_channels()
