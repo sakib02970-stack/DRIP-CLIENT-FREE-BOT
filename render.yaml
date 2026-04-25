@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: telegram-referral-bot
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python bot.py"
+    envVars:
+      - key: BOT_TOKEN
+        sync: false  # You will set this in Render dashboard
+      - key: PYTHON_VERSION
+        value: 3.11.0
