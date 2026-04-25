@@ -9,6 +9,17 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 import json
 import random
 import string
+from flask import Flask
+import threading
+
+app_web = Flask(__name__)
+
+@app_web.route('/')
+def home():
+    return "Bot is alive ✅"
+
+def run_web():
+    app_web.run(host="0.0.0.0", port=10000)
 from datetime import datetime
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -686,6 +697,9 @@ def main():
     print("🤖 Bot is running...")
     print(f"👑 Owner IDs: {OWNER_IDS}")
     print(f"📢 Notify Group: {NOTIFY_GROUP_ID}")
+    
+    threading.Thread(target=run_web, daemon=True).start()
+
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
