@@ -33,7 +33,7 @@ from telegram.ext import (
 from telegram.constants import ParseMode
 
 # ============ CONFIGURATION ============
-OWNER_IDS = [7682896710, 7765423734]
+OWNER_IDS = [7682896710, 7982932343]
 NOTIFY_GROUP_ID = -1003715248836
 YOUTUBE_LINK = "https://youtube.com/yourlink"
 
