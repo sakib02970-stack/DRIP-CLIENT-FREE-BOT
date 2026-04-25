@@ -28,12 +28,13 @@ from telegram.ext import (
     CallbackQueryHandler,
     ContextTypes,
     MessageHandler,
-    filters
+    filters,
+    ChatJoinRequestHandler
 )
 from telegram.constants import ParseMode
 
 # ============ CONFIGURATION ============
-OWNER_IDS = [7682896710, 7982932343]
+OWNER_IDS = [7682896710, 7765423734]
 NOTIFY_GROUP_ID = -1003715248836
 YOUTUBE_LINK = "https://youtube.com/yourlink"
 
@@ -286,6 +287,13 @@ def build_refer_menu(refer_link):
 
 # ============ HANDLERS ============
 
+async def handle_join_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    join_request = update.chat_join_request
+    user_id = join_request.from_user.id
+    chat_id = join_request.chat.id
+
+    print(f"Join request from {user_id} in {chat_id}")
+    
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_id = user.id
@@ -693,6 +701,7 @@ def main():
     application.add_handler(CommandHandler("stats", admin_stats))
     application.add_handler(CommandHandler("id", debug_info))
     application.add_handler(CallbackQueryHandler(button_handler))
+    application.add_handler(ChatJoinRequestHandler(handle_join_request))
 
     print("🤖 Bot is running...")
     print(f"👑 Owner IDs: {OWNER_IDS}")
