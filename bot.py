@@ -5,6 +5,7 @@ Author: Assistant
 """
 
 import os
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 import json
 import random
 import string
@@ -21,7 +22,6 @@ from telegram.ext import (
 from telegram.constants import ParseMode
 
 # ============ CONFIGURATION ============
-BOT_TOKEN = "8422003531:AAEQA-Gemi_GFb4-CgmDPMDW8OzvAVARJZU"
 OWNER_IDS = [7682896710, 7765423734]
 NOTIFY_GROUP_ID = -1003715248836
 YOUTUBE_LINK = "https://youtube.com/yourlink"
